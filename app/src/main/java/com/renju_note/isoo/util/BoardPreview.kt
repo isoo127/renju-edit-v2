@@ -7,7 +7,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import com.renju_note.isoo.data.BoardColorSetting
-import io.realm.RealmList
+import io.realm.kotlin.types.RealmList
 
 class BoardPreview(context : Context, attrs : AttributeSet) : View(context, attrs) {
 
@@ -33,7 +33,7 @@ class BoardPreview(context : Context, attrs : AttributeSet) : View(context, attr
         lineInterval = MeasureSpec.getSize(widthMeasureSpec).toFloat() / 15
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         paint.isAntiAlias = true
         paint.style = Paint.Style.STROKE

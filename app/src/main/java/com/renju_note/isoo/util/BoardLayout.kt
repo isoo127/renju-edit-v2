@@ -251,7 +251,7 @@ class BoardLayout(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
         lineInterval = MeasureSpec.getSize(widthMeasureSpec).toFloat() / 16
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         paint.isAntiAlias = true
         drawBoard(canvas)

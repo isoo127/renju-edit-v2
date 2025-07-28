@@ -5,6 +5,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -19,6 +20,10 @@ import com.renju_note.isoo.fragment.BoardFragment
 import com.renju_note.isoo.fragment.SettingFragment
 import com.renju_note.isoo.fragment.StorageFragment
 import com.renju_note.isoo.util.SeqTreeBoardManager
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,6 +39,32 @@ class MainActivity : AppCompatActivity() {
         binding.mainPager.registerOnPageChangeCallback(PageChangeCallback())
         binding.bottomNavigationView.setOnItemSelectedListener { navigationSelected(it) }
         binding.mainPager.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
+        WindowInsetsControllerCompat(window, binding.root).isAppearanceLightStatusBars = true
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
+
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val confirmDialog = ConfirmDialog(this@MainActivity, resources.getString(R.string.exit_confirm))
+                confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+                confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
+                    override fun confirm() {
+                        confirmDialog.dismiss()
+                        finish()
+                    }
+                    override fun refuse() {
+                        confirmDialog.dismiss()
+                    }
+                })
+                confirmDialog.show()
+            }
+        }
+
+        this.onBackPressedDispatcher.addCallback(this, callback)
     }
 
     private fun navigationSelected(item: MenuItem): Boolean {
@@ -78,19 +109,6 @@ class MainActivity : AppCompatActivity() {
                 else -> error("no such position: $position")
             }
         }
-    }
-
-    override fun onBackPressed() {
-        val confirmDialog = ConfirmDialog(this, resources.getString(R.string.exit_confirm))
-        confirmDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
-            override fun confirm() {
-                confirmDialog.dismiss()
-                finish()
-            }
-            override fun refuse() { confirmDialog.dismiss() }
-        })
-        confirmDialog.show()
     }
 
     override fun onDestroy() {

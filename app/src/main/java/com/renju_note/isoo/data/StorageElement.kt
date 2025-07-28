@@ -1,40 +1,38 @@
 package com.renju_note.isoo.data
 
 import android.net.Uri
-import io.realm.RealmList
-import io.realm.RealmObject
-import io.realm.annotations.Ignore
-import io.realm.annotations.PrimaryKey
+import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.types.RealmList
+import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.annotations.PrimaryKey
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-open class StorageElement(
-    var title : String = "",
-    @Ignore
-    val uri : Uri? = null,
-    @Ignore
-    val seq : ArrayList<Stone>? = null
-    ) : RealmObject() {
+class StorageElement : RealmObject {
 
-    var date : String = ""
-    var sequence = RealmList<String>()
     @PrimaryKey
     var location : String = ""
+    var title : String = ""
+    var date : String = ""
+    var sequence: RealmList<String> = realmListOf()
 
-    init {
-        val current = LocalDateTime.now()
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        val formatted = current.format(formatter)
-        date = formatted
+    companion object {
+        fun create(title: String, uri: Uri, seq: ArrayList<Stone>): StorageElement {
+            val element = StorageElement()
+            element.title = title
 
-        if(seq != null) {
+            val current = LocalDateTime.now()
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            element.date = current.format(formatter)
+
             for (stone in seq) {
                 val str = stone.x.toString() + "/" + stone.y.toString()
-                sequence.add(str)
+                element.sequence.add(str)
             }
-        }
 
-        location = uri.toString()
+            element.location = uri.toString()
+            return element
+        }
     }
 
     fun getParsedUri() : Uri {

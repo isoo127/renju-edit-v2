@@ -4,8 +4,8 @@ import android.app.Application
 import com.renju_note.isoo.data.*
 import com.renju_note.isoo.util.PreferenceUtil
 import com.renju_note.isoo.util.SeqTreeBoardManager
-import io.realm.Realm
-import io.realm.RealmConfiguration
+import io.realm.kotlin.Realm
+import io.realm.kotlin.RealmConfiguration
 
 class RenjuEditApplication : Application() {
 
@@ -39,6 +39,7 @@ class RenjuEditApplication : Application() {
 
     companion object {
         lateinit var pref : PreferenceUtil
+        lateinit var realm: Realm
         var settings = Settings()
         var boardManager = SeqTreeBoardManager()
         var editingFile : StorageElement? = null
@@ -49,13 +50,11 @@ class RenjuEditApplication : Application() {
         pref = PreferenceUtil(applicationContext)
         settings.load(pref)
 
-        Realm.init(this)
-        val config : RealmConfiguration = RealmConfiguration.Builder()
-            .allowWritesOnUiThread(true)
+        val config = RealmConfiguration.Builder(schema = setOf(StorageElement::class))
             .name("renju_edit.realm")
             .deleteRealmIfMigrationNeeded()
             .build()
-        Realm.setDefaultConfiguration(config)
+        realm = Realm.open(config)
     }
 
 }

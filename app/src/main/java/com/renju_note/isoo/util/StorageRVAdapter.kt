@@ -6,14 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
 import androidx.recyclerview.widget.RecyclerView
+import com.renju_note.isoo.RenjuEditApplication
 import com.renju_note.isoo.data.StorageElement
 import com.renju_note.isoo.databinding.ItemStorageListBinding
 import com.renju_note.isoo.databinding.PopupMenuStorageBinding
-import io.realm.Realm
-import io.realm.kotlin.where
-import java.text.SimpleDateFormat
-import java.util.*
-
+import io.realm.kotlin.ext.query
+import io.realm.kotlin.query.Sort
 
 class StorageRVAdapter(private val context : Context) : RecyclerView.Adapter<StorageRVAdapter.ViewHolder>() {
 
@@ -92,15 +90,11 @@ class StorageRVAdapter(private val context : Context) : RecyclerView.Adapter<Sto
     }
 
     fun updateDataList() {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val dateComparator = Comparator<StorageElement> { str1, str2 ->
-            val date1 = dateFormat.parse(str1.date)
-            val date2 = dateFormat.parse(str2.date)
-            date2?.compareTo(date1) ?: 0
-        }
-        val realm = Realm.getDefaultInstance()
-        val realmList = realm.where<StorageElement>().findAll()
-        storageList = realmList.sortedWith(dateComparator)
+        val realm = RenjuEditApplication.realm
+        val results = realm.query<StorageElement>()
+            .sort("date", Sort.DESCENDING)
+            .find()
+        storageList = results
     }
 
 }

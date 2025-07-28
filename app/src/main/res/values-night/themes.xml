@@ -10,7 +10,7 @@
         <item name="colorSecondaryVariant">@color/white</item>
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor">@color/black</item>
         <!-- Customize your theme here. -->
         <item name="fontFamily">@font/spoqa_regular</item>
     </style>
@@ -21,5 +21,8 @@
     <style name="Toolbar.TitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize" tools:ignore="SpUsage">20dp</item>
         <item name="fontFamily">@font/spoqa_regular</item>
+    </style>
+    <style name="StoragePopupMenu" parent="Widget.AppCompat.Button.Borderless">
+        <item name="textAllCaps">false</item>
     </style>
 </resources>

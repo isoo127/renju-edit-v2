@@ -31,11 +31,12 @@ import android.view.ViewGroup
 import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.renju_note.isoo.R
+import com.renju_note.isoo.RenjuEditApplication
 import com.renju_note.isoo.RenjuEditApplication.Companion.boardManager
 import com.renju_note.isoo.RenjuEditApplication.Companion.editingFile
 import com.renju_note.isoo.RenjuEditApplication.Companion.pref
@@ -50,14 +51,13 @@ import com.renju_note.isoo.dialog.ConfirmDialog
 import com.renju_note.isoo.dialog.PutTextDialog
 import com.renju_note.isoo.util.BoardLayout
 import com.renju_note.isoo.util.LoadingAsync
-import io.realm.Realm
-import io.realm.Realm.getApplicationContext
+import io.realm.kotlin.UpdatePolicy
+import kotlinx.coroutines.launch
 import java.io.*
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-
 
 class BoardFragment : Fragment() {
 
@@ -614,7 +614,7 @@ class BoardFragment : Fragment() {
                 MediaScannerConnection.scanFile(requireContext(), arrayOf(Uri.parse("file://$file").path), arrayOf("image/jpeg"), null)
                 Toast.makeText(context, "Image saved to gallery", Toast.LENGTH_SHORT).show()
             } catch (e: IOException) {
-                Toast.makeText(getApplicationContext(), "Failed", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Failed", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -633,20 +633,22 @@ class BoardFragment : Fragment() {
             return fileName
         }
 
-        val storageElement = StorageElement(getFileNameFromUri(requireContext(), uri), uri,
-            boardManager.getSequence(boardManager.getNowBoardStatus()))
-        editingFile = storageElement
+        val newStorageElement = StorageElement.create(
+            title = getFileNameFromUri(requireContext(), uri),
+            uri = uri,
+            seq = boardManager.getSequence(boardManager.getNowBoardStatus())
+        )
+        editingFile = newStorageElement
         binding.boardEditingFileNameTv.text = editingFile?.title
 
-        val realm = Realm.getDefaultInstance()
-        if(editingFile != null) {
-            realm.beginTransaction()
-            realm.copyToRealmOrUpdate(editingFile!!)
-            realm.commitTransaction()
-        }
+        lifecycleScope.launch {
+            RenjuEditApplication.realm.write {
+                copyToRealm(newStorageElement, UpdatePolicy.ALL)
+            }
 
-        val storageFragment = requireActivity().supportFragmentManager.findFragmentByTag("f1") as StorageFragment?
-        storageFragment?.updateRV()
+            val storageFragment = requireActivity().supportFragmentManager.findFragmentByTag("f1") as StorageFragment?
+            storageFragment?.updateRV()
+        }
     }
 
     private fun saveNowEditingFile() {

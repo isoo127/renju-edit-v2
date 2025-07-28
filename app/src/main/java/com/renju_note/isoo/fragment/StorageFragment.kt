@@ -8,15 +8,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.renju_note.isoo.R
+import com.renju_note.isoo.RenjuEditApplication
 import com.renju_note.isoo.data.StorageElement
 import com.renju_note.isoo.databinding.FragmentStorageBinding
 import com.renju_note.isoo.dialog.ConfirmDialog
 import com.renju_note.isoo.util.StorageRVAdapter
-import io.realm.Realm
-import io.realm.kotlin.where
+import kotlinx.coroutines.launch
 
 class StorageFragment : Fragment() {
 
@@ -57,12 +58,16 @@ class StorageFragment : Fragment() {
                     confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                         override fun confirm() {
                             confirmDialog.dismiss()
-                            val realm = Realm.getDefaultInstance()
-                            val delete = realm.where<StorageElement>().equalTo("location", element.location).findFirst()
-                            realm.beginTransaction()
-                            delete?.deleteFromRealm()
-                            realm.commitTransaction()
-                            updateRV()
+                            lifecycleScope.launch {
+                                val realm = RenjuEditApplication.realm
+                                realm.write {
+                                    val liveObjectToDelete = findLatest(element)
+                                    liveObjectToDelete?.let {
+                                        delete(it)
+                                    }
+                                }
+                                updateRV()
+                            }
                         }
                         override fun refuse() { confirmDialog.dismiss() }
                     })
