@@ -6,7 +6,7 @@ import androidx.core.content.edit
 
 class PreferenceUtil(context : Context) {
 
-    private val prefs : SharedPreferences = context.getSharedPreferences("storage_pk", Context.MODE_PRIVATE)
+    private val prefs : SharedPreferences = context.getSharedPreferences("storage_re", Context.MODE_PRIVATE)
 
     fun getString(key: String, defValue: String): String {
         return prefs.getString(key, defValue).toString()
