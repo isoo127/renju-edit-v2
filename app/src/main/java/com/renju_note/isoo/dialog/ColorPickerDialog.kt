@@ -3,13 +3,13 @@ package com.renju_note.isoo.dialog
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
-import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import com.renju_note.isoo.R
 import com.renju_note.isoo.databinding.DialogColorPickerBinding
 import com.skydoves.colorpickerview.listeners.ColorListener
@@ -46,7 +46,7 @@ class ColorPickerDialog(context : Context, private val activity : Activity, priv
                 binding.colorPickerPreview.background = makePreviewDrawable(colorInt2String(color))
             }
         })
-        binding.colorPickerView.setInitialColor(Color.parseColor(initialColor))
+        binding.colorPickerView.setInitialColor(initialColor.toColorInt())
         binding.colorPickerView.setSelectorDrawable(ContextCompat.getDrawable(context, R.drawable.color_picker_selector))
 
         colorTextChanged()
@@ -77,10 +77,10 @@ class ColorPickerDialog(context : Context, private val activity : Activity, priv
             override fun afterTextChanged(p0: Editable?) {
                 try {
                     if(isKeyBoardUp) {
-                        val color = Color.parseColor(p0.toString())
+                        val color = p0.toString().toColorInt()
                         binding.colorPickerView.setInitialColor(color)
                     }
-                } catch (e : Exception) { }
+                } catch (_ : Exception) { }
             }
         })
         binding.colorPickerCodeEt.setText(initialColor)
@@ -96,8 +96,8 @@ class ColorPickerDialog(context : Context, private val activity : Activity, priv
 
     private fun makePreviewDrawable(color : String) : GradientDrawable {
         val drawable1 = GradientDrawable()
-        drawable1.setColor(Color.parseColor(color))
-        drawable1.setStroke(3, Color.parseColor("#666666"))
+        drawable1.setColor(color.toColorInt())
+        drawable1.setStroke(3, "#666666".toColorInt())
         drawable1.shape = GradientDrawable.RECTANGLE
         return drawable1
     }

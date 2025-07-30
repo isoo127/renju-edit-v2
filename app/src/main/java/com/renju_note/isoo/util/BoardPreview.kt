@@ -8,6 +8,7 @@ import android.util.AttributeSet
 import android.view.View
 import com.renju_note.isoo.data.BoardColorSetting
 import io.realm.kotlin.types.RealmList
+import androidx.core.graphics.toColorInt
 
 class BoardPreview(context : Context, attrs : AttributeSet) : View(context, attrs) {
 
@@ -25,7 +26,7 @@ class BoardPreview(context : Context, attrs : AttributeSet) : View(context, attr
     }
 
     init {
-        setBackgroundColor(Color.parseColor(boardColorSetting.boardColor))
+        setBackgroundColor(boardColorSetting.boardColor.toColorInt())
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -37,9 +38,9 @@ class BoardPreview(context : Context, attrs : AttributeSet) : View(context, attr
         super.onDraw(canvas)
         paint.isAntiAlias = true
         paint.style = Paint.Style.STROKE
-        paint.color = Color.parseColor(boardColorSetting.lineColor)
+        paint.color = boardColorSetting.lineColor.toColorInt()
         paint.strokeWidth = (width / 351.3 + 0.5).toInt().toFloat()
-        canvas!!.drawRect(lineInterval*0.5f, lineInterval*0.5f, lineInterval*14.5f, lineInterval*14.5f, paint)
+        canvas.drawRect(lineInterval*0.5f, lineInterval*0.5f, lineInterval*14.5f, lineInterval*14.5f, paint)
         stones.forEach {
             it.draw(canvas)
         }

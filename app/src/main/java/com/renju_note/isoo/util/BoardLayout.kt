@@ -12,6 +12,7 @@ import java.io.Serializable
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
+import androidx.core.graphics.toColorInt
 
 class BoardLayout(context: Context, attrs: AttributeSet?) : ConstraintLayout(context, attrs), Serializable {
 
@@ -37,7 +38,7 @@ class BoardLayout(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
 
         override fun draw(canvas : Canvas?) {
             paint.apply {
-                color = Color.parseColor(lineColor)
+                color = lineColor.toColorInt()
                 style = Paint.Style.STROKE
                 strokeWidth = lineInterval / 9.4107f
                 pathEffect = DashPathEffect(floatArrayOf(10f, 5f), 0f)
@@ -55,7 +56,7 @@ class BoardLayout(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
 
         override fun draw(canvas : Canvas?) {
             paint.apply {
-                color = Color.parseColor(areaColor)
+                color = areaColor.toColorInt()
                 style = Paint.Style.FILL
             }
             if(left > right) {
@@ -112,7 +113,7 @@ class BoardLayout(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
 
             paint.style = Paint.Style.FILL
             paint.pathEffect = null
-            paint.color = Color.parseColor(arrowColor)
+            paint.color = arrowColor.toColorInt()
             canvas?.drawPath(path, paint)
         }
 
@@ -124,7 +125,7 @@ class BoardLayout(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
     inner class Point(private val x : Int, private val y : Int, private val pointColor : String) : Element {
         override fun draw(canvas : Canvas?) {
             paint.apply {
-                color = Color.parseColor(pointColor)
+                color = pointColor.toColorInt()
                 style = Paint.Style.FILL
                 pathEffect = null
             }
@@ -155,9 +156,9 @@ class BoardLayout(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
                 pathEffect = null
                 strokeWidth = (width / 351.3 + 0.5).toInt().toFloat()
                 color = if(index == stones.size)
-                    Color.parseColor(blendColors("#FFFFFF", boardColorSetting.lastStoneStrokeColor))
+                    blendColors("#FFFFFF", boardColorSetting.lastStoneStrokeColor).toColorInt()
                 else
-                    Color.parseColor(blendColors("#FFFFFF", boardColorSetting.lineColor))
+                    blendColors("#FFFFFF", boardColorSetting.lineColor).toColorInt()
                 style = Paint.Style.STROKE
             }
             canvas?.drawCircle(getRealX(x), getRealY(y), radius, paint)
@@ -194,7 +195,7 @@ class BoardLayout(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
             paint.strokeWidth = (width / 351.3 + 0.5).toInt().toFloat()
             paint.style = Paint.Style.FILL
             if (text.isNotEmpty()) {
-                paint.color = Color.parseColor(blendColors("#FFFFFF", boardColorSetting.boardColor))
+                paint.color = blendColors("#FFFFFF", boardColorSetting.boardColor).toColorInt()
                 paint.getTextBounds(text, 0, text.length, bounds)
                 if(bounds.width() > lineInterval) {
                     text = text.substring(0, text.length - 1)
@@ -208,7 +209,7 @@ class BoardLayout(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
                     getRealX(x) + centerX,
                     getRealY(y) + centerY - lineInterval / 13.2f, paint
                 )
-                paint.color = Color.parseColor(blendColors("#FFFFFF", boardColorSetting.textColor))
+                paint.color = blendColors("#FFFFFF", boardColorSetting.textColor).toColorInt()
                 paint.textSize = lineInterval / 2.2f
                 paint.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
                 canvas?.drawText(
@@ -218,7 +219,7 @@ class BoardLayout(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
                     paint
                 )
             } else {
-                paint.color = Color.parseColor(blendColors("#FFFFFF", boardColorSetting.nodeColor))
+                paint.color = blendColors("#FFFFFF", boardColorSetting.nodeColor).toColorInt()
                 canvas?.drawCircle(getRealX(x), getRealY(y), lineInterval / 34 * 6, paint)
             }
         }
@@ -273,11 +274,11 @@ class BoardLayout(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
         // board background
         paint.pathEffect = null
         paint.style = Paint.Style.FILL
-        paint.color = Color.parseColor(boardColorSetting.boardColor)
+        paint.color = boardColorSetting.boardColor.toColorInt()
         canvas!!.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
 
         // board lines
-        paint.color = Color.parseColor(blendColors("#FFFFFF", boardColorSetting.lineColor))
+        paint.color = blendColors("#FFFFFF", boardColorSetting.lineColor).toColorInt()
         paint.strokeWidth = (width / 351.3 + 0.5).toInt().toFloat()
         val x = lineInterval
         for (i in 1..15) {
@@ -386,7 +387,7 @@ class BoardLayout(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
     fun deleteLastDrawingElement() {
         points.clear()
         if(drawingElements.isNotEmpty())
-            drawingElements.removeLast()
+            drawingElements.removeAt(drawingElements.size - 1)
         invalidate()
     }
 
@@ -414,8 +415,8 @@ class BoardLayout(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
     }
 
     private fun blendColors(baseColor: String, blendColor: String): String {
-        val base = Color.parseColor(baseColor)
-        val blend = Color.parseColor(blendColor)
+        val base = baseColor.toColorInt()
+        val blend = blendColor.toColorInt()
         val alpha = Color.alpha(blend) / 255f
         val red = (1 - alpha) * Color.red(base) + alpha * Color.red(blend)
         val green = (1 - alpha) * Color.green(base) + alpha * Color.green(blend)

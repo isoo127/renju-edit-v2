@@ -2,11 +2,11 @@ package com.renju_note.isoo.fragment
 
 import android.annotation.SuppressLint
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -41,7 +41,7 @@ class StorageFragment : Fragment() {
             object : StorageRVAdapter.StoragePopupMenuListener {
                 override fun load(pos: Int, storageList: List<StorageElement>) {
                     val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.storage_load_confirm))
-                    confirmDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                    confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                     confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                         override fun confirm() {
                             confirmDialog.dismiss()
@@ -54,7 +54,7 @@ class StorageFragment : Fragment() {
 
                 override fun delete(pos: Int, element: StorageElement) {
                     val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.storage_delete_confirm))
-                    confirmDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                    confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                     confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                         override fun confirm() {
                             confirmDialog.dismiss()

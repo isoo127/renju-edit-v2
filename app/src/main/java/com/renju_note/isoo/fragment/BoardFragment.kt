@@ -12,7 +12,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.media.MediaScannerConnection
 import android.net.Uri
@@ -32,6 +31,8 @@ import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -53,11 +54,19 @@ import com.renju_note.isoo.util.BoardLayout
 import com.renju_note.isoo.util.LoadingAsync
 import io.realm.kotlin.UpdatePolicy
 import kotlinx.coroutines.launch
-import java.io.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
+import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Date
+import androidx.core.net.toUri
+import androidx.core.graphics.createBitmap
 
 class BoardFragment : Fragment() {
 
@@ -231,7 +240,7 @@ class BoardFragment : Fragment() {
 
             popupBinding.popupDrawingModeDeleteBtn.setOnClickListener {
                 val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.delete_drawing_element_confirm))
-                confirmDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                 confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                     override fun confirm() {
                         confirmDialog.dismiss()
@@ -287,7 +296,7 @@ class BoardFragment : Fragment() {
     private fun delete() {
         if(boardManager.getNowIndex() != 1) {
             val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.delete_confirm))
-            confirmDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
             confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                 override fun confirm() {
                     confirmDialog.dismiss()
@@ -312,7 +321,7 @@ class BoardFragment : Fragment() {
                     val before = boardManager.getNowBoardStatus()
                     if (editMode == EditMode.ADD_TEXT) {
                         val putTextDialog = PutTextDialog(requireContext())
-                        putTextDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        putTextDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         putTextDialog.setOnResponseListener(object :
                             PutTextDialog.OnResponseListener {
                             override fun cancel() {
@@ -400,7 +409,11 @@ class BoardFragment : Fragment() {
     fun updateTextAreaStatus() {
         binding.boardTextAreaEt.isVisible = settings.textAreaSetting.isVisible
         binding.boardTextAreaEt.background = makeTextAreaDrawable(settings.textAreaSetting.backgroundColor, settings.textAreaSetting.strokeColor)
-        binding.boardTextAreaEt.setTextColor(Color.parseColor(blendColors("#FFFFFF", settings.textAreaSetting.textColor)))
+        binding.boardTextAreaEt.setTextColor(
+            blendColors(
+                "#FFFFFF",
+                settings.textAreaSetting.textColor
+            ).toColorInt())
     }
 
     fun updateMode() {
@@ -414,15 +427,15 @@ class BoardFragment : Fragment() {
 
     private fun makeTextAreaDrawable(backgroundColor : String, strokeColor : String) : GradientDrawable {
         val drawable1 = GradientDrawable()
-        drawable1.setColor(Color.parseColor(backgroundColor))
-        drawable1.setStroke(3, Color.parseColor(strokeColor))
+        drawable1.setColor(backgroundColor.toColorInt())
+        drawable1.setStroke(3, strokeColor.toColorInt())
         drawable1.shape = GradientDrawable.RECTANGLE
         return drawable1
     }
 
     private fun blendColors(baseColor: String, blendColor: String): String {
-        val base = Color.parseColor(baseColor)
-        val blend = Color.parseColor(blendColor)
+        val base = baseColor.toColorInt()
+        val blend = blendColor.toColorInt()
         val alpha = Color.alpha(blend) / 255f
         val red = (1 - alpha) * Color.red(base) + alpha * Color.red(blend)
         val green = (1 - alpha) * Color.green(base) + alpha * Color.green(blend)
@@ -492,7 +505,7 @@ class BoardFragment : Fragment() {
                 when (item.itemId) {
                     R.id.action_capture -> {
                         val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.capture_confirm))
-                        confirmDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                             override fun confirm() {
                                 confirmDialog.dismiss()
@@ -507,7 +520,7 @@ class BoardFragment : Fragment() {
                     }
                     R.id.new_board -> {
                         val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.new_file_confirm))
-                        confirmDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                             override fun confirm() {
                                 confirmDialog.dismiss()
@@ -540,7 +553,7 @@ class BoardFragment : Fragment() {
                     R.id.about -> {
                         val dialog = Dialog(requireContext())
                         dialog.setContentView(R.layout.dialog_about)
-                        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        dialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         dialog.show()
                     }
                 }
@@ -571,7 +584,7 @@ class BoardFragment : Fragment() {
         val width = layout.width
         val height = layout.height
 
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(width, height)
         val canvas = Canvas(bitmap)
         layout.draw(canvas)
 
@@ -611,9 +624,9 @@ class BoardFragment : Fragment() {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                 outputStream.flush()
                 outputStream.close()
-                MediaScannerConnection.scanFile(requireContext(), arrayOf(Uri.parse("file://$file").path), arrayOf("image/jpeg"), null)
+                MediaScannerConnection.scanFile(requireContext(), arrayOf("file://$file".toUri().path), arrayOf("image/jpeg"), null)
                 Toast.makeText(context, "Image saved to gallery", Toast.LENGTH_SHORT).show()
-            } catch (e: IOException) {
+            } catch (_: IOException) {
                 Toast.makeText(requireContext(), "Failed", Toast.LENGTH_LONG).show()
             }
         }

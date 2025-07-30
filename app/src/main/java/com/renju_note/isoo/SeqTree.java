@@ -1,5 +1,6 @@
 package com.renju_note.isoo;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /*
@@ -9,6 +10,7 @@ white stone : -1
 no stone : 0
  */
 public class SeqTree implements Serializable {
+    @Serial
     private static final long serialVersionUID = 2765198187236704398L;
 
     private final Node head = new Node(-1, -1);
@@ -23,11 +25,12 @@ public class SeqTree implements Serializable {
     }
 
     public static class Node implements Serializable{
+        @Serial
         private static final long serialVersionUID = -6403100239045118824L;
 
         private final int x;
         private final int y;
-        private Node chlid;
+        private Node child;
         private Node next;
         private Node parent;
 
@@ -37,7 +40,7 @@ public class SeqTree implements Serializable {
         public Node(int x, int y) {
             this.x = x;
             this.y = y;
-            this.chlid = null;
+            this.child = null;
             this.next = null;
             this.parent = null;
         }
@@ -51,7 +54,7 @@ public class SeqTree implements Serializable {
         }
 
         public Node getChild() {
-            return chlid;
+            return child;
         }
 
         public Node getNext() { return  next; }
@@ -60,8 +63,8 @@ public class SeqTree implements Serializable {
             return parent;
         }
 
-        public void setChild(Node chlid) {
-            this.chlid = chlid;
+        public void setChild(Node child) {
+            this.child = child;
         }
 
         public void setNext(Node next) {
@@ -89,20 +92,19 @@ public class SeqTree implements Serializable {
         if(current_node == null || current_node.getChild() == null) {
             Node newChild = new Node(x, y);
             if (head.getChild() == null) {
-                head.chlid = newChild;
-                newChild.parent = head;
+                head.child = newChild;
                 current_node = head;
             }
             newChild.parent = current_node;
             assert current_node != null;
-            current_node.chlid = newChild;
+            current_node.child = newChild;
             now = newChild;
             if((nowSequence % 2) == 0) // mean black
                 now_board[x][y] = nowSequence;
             else // mean white
                 now_board[x][y] = -1 * nowSequence;
         } else {
-            for(Node temp = current_node.chlid;temp != null;temp = temp.next) {
+            for(Node temp = current_node.child; temp != null; temp = temp.next) {
                 if(temp.x == x && temp.y == y) {
                     now = temp;
                     if((nowSequence % 2) == 0)
@@ -132,7 +134,7 @@ public class SeqTree implements Serializable {
     }
 
     public void redo(Node current_node, int nowSequence) {
-        if(current_node.chlid != null && current_node.chlid.next == null) {
+        if(current_node.child != null && current_node.child.next == null) {
             now = current_node.getChild();
             if((nowSequence % 2) == 0)
                 now_board[current_node.getChild().getX()][current_node.getChild().getY()] = nowSequence;
@@ -143,13 +145,13 @@ public class SeqTree implements Serializable {
 
     public void delete(Node current_node) {
         now = current_node.parent;
-        if(now.chlid.next == null) {
+        if(now.child.next == null) {
             now.setChild(null);
         } else {
             if(now.getChild().getX() == current_node.getX() && now.getChild().getY() == current_node.getY()) {
                 now.setChild(now.getChild().getNext());
             } else {
-                for (Node temp = now.chlid; ; temp = temp.next) {
+                for (Node temp = now.child; ; temp = temp.next) {
                     if (temp.getNext().getX() == current_node.getX() && temp.getNext().getY() == current_node.getY()) {
                         if (temp.getNext().getNext() == null) {
                             temp.setNext(null);
@@ -168,15 +170,14 @@ public class SeqTree implements Serializable {
         if(current_node == null || current_node.getChild() == null) {
             Node newChild = new Node(x, y);
             if (head.getChild() == null) {
-                head.chlid = newChild;
-                newChild.parent = head;
+                head.child = newChild;
                 current_node = head;
             }
             newChild.parent = current_node;
             assert current_node != null;
-            current_node.chlid = newChild;
+            current_node.child = newChild;
         } else {
-            for(Node temp = current_node.chlid;temp != null;temp = temp.next) {
+            for(Node temp = current_node.child; temp != null; temp = temp.next) {
                 if(temp.x == x && temp.y == y) {
                     return;
                 }

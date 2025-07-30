@@ -7,6 +7,7 @@ import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import androidx.core.net.toUri
 
 class StorageElement : RealmObject {
 
@@ -36,7 +37,7 @@ class StorageElement : RealmObject {
     }
 
     fun getParsedUri() : Uri {
-        return Uri.parse(location)
+        return location.toUri()
     }
 
 }

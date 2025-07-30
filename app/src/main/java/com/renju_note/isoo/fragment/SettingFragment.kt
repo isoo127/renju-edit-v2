@@ -18,6 +18,8 @@ import com.renju_note.isoo.dialog.ColorPickerDialog
 import com.renju_note.isoo.dialog.ConfirmDialog
 import com.renju_note.isoo.util.SettingColorRVAdapter
 import com.renju_note.isoo.util.SettingDisplayRVAdapter
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.graphics.toColorInt
 
 class SettingFragment : Fragment() {
 
@@ -35,7 +37,7 @@ class SettingFragment : Fragment() {
 
         binding.settingRollbackBtn.setOnClickListener {
             val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.default_setting_warning))
-            confirmDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
             confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                 override fun confirm() {
                     confirmDialog.dismiss()
@@ -76,7 +78,7 @@ class SettingFragment : Fragment() {
                 when(position) {
                     0 -> {
                         val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.boardColor)
-                        colorPickerDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
@@ -90,7 +92,7 @@ class SettingFragment : Fragment() {
                     }
                     1 -> {
                         val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.lineColor)
-                        colorPickerDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
@@ -104,7 +106,7 @@ class SettingFragment : Fragment() {
                     }
                     2 -> {
                         val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.textColor)
-                        colorPickerDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
@@ -118,7 +120,7 @@ class SettingFragment : Fragment() {
                     }
                     3 -> {
                         val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.nodeColor)
-                        colorPickerDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
@@ -132,7 +134,7 @@ class SettingFragment : Fragment() {
                     }
                     4 -> {
                         val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.lastStoneStrokeColor)
-                        colorPickerDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
@@ -146,7 +148,7 @@ class SettingFragment : Fragment() {
                     }
                     5 -> {
                         val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.textAreaSetting.backgroundColor)
-                        colorPickerDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
@@ -160,7 +162,7 @@ class SettingFragment : Fragment() {
                     }
                     6 -> {
                         val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.textAreaSetting.strokeColor)
-                        colorPickerDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
@@ -174,7 +176,7 @@ class SettingFragment : Fragment() {
                     }
                     7 -> {
                         val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.textAreaSetting.textColor)
-                        colorPickerDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
@@ -188,7 +190,7 @@ class SettingFragment : Fragment() {
                     }
                     8 -> {
                         val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.drawLineColor)
-                        colorPickerDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
@@ -202,7 +204,7 @@ class SettingFragment : Fragment() {
                     }
                     9 -> {
                         val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.drawAreaColor)
-                        colorPickerDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
@@ -216,7 +218,7 @@ class SettingFragment : Fragment() {
                     }
                     10 -> {
                         val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.drawArrowColor)
-                        colorPickerDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
@@ -272,8 +274,8 @@ class SettingFragment : Fragment() {
 
     private fun makePreviewDrawable(color : String) : GradientDrawable {
         val drawable1 = GradientDrawable()
-        drawable1.setColor(Color.parseColor(color))
-        drawable1.setStroke(3, Color.parseColor("#666666"))
+        drawable1.setColor(color.toColorInt())
+        drawable1.setStroke(3, "#666666".toColorInt())
         drawable1.shape = GradientDrawable.RECTANGLE
         return drawable1
     }

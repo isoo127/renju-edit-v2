@@ -23,7 +23,7 @@ class SeqTreeBoardManager : BoardManager {
         }
         var tmp = seqTree.now.child
         while(tmp != null) {
-            val text = if(tmp.text == null) "" else tmp.text
+            val text = tmp.text ?: ""
             status.add(Stone(tmp.x, tmp.y, text, Stone.Type.CHILD))
             tmp = tmp.next
         }
@@ -35,7 +35,7 @@ class SeqTreeBoardManager : BoardManager {
     }
 
     override fun getNowTextBoxString(): String {
-        return if(seqTree.now.boxText != null) seqTree.now.boxText else ""
+        return seqTree.now.boxText ?: ""
     }
 
     fun getSequence(boardStatus : ArrayList<Stone>): ArrayList<Stone> {

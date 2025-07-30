@@ -2,6 +2,7 @@ package com.renju_note.isoo.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 
 class PreferenceUtil(context : Context) {
 
@@ -12,7 +13,7 @@ class PreferenceUtil(context : Context) {
     }
 
     fun setString(key: String, str: String) {
-        prefs.edit().putString(key, str).apply()
+        prefs.edit { putString(key, str) }
     }
 
 }

@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.renju_note.isoo.R
 import com.renju_note.isoo.RenjuEditApplication.Companion.settings
 import com.renju_note.isoo.databinding.ItemSettingColorBinding
+import androidx.core.graphics.toColorInt
 
 class SettingColorRVAdapter(val context : Context) : RecyclerView.Adapter<SettingColorRVAdapter.ViewHolder>() {
 
@@ -111,8 +112,8 @@ class SettingColorRVAdapter(val context : Context) : RecyclerView.Adapter<Settin
 
     private fun makePreviewDrawable(color : String) : GradientDrawable {
         val drawable1 = GradientDrawable()
-        drawable1.setColor(Color.parseColor(color))
-        drawable1.setStroke(3, Color.parseColor("#666666"))
+        drawable1.setColor(color.toColorInt())
+        drawable1.setStroke(3, "#666666".toColorInt())
         drawable1.shape = GradientDrawable.RECTANGLE
         return drawable1
     }
