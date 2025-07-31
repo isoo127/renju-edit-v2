@@ -19,10 +19,10 @@ import com.renju_note.isoo.RenjuEditApplication.Companion.boardManager
 import com.renju_note.isoo.RenjuEditApplication.Companion.editingFile
 import com.renju_note.isoo.databinding.ActivityMainBinding
 import com.renju_note.isoo.dialog.ConfirmDialog
-import com.renju_note.isoo.fragment.BoardFragment
-import com.renju_note.isoo.fragment.SettingFragment
-import com.renju_note.isoo.fragment.StorageFragment
-import com.renju_note.isoo.util.SeqTreeBoardManager
+import com.renju_note.isoo.board.BoardFragment
+import com.renju_note.isoo.setting.SettingFragment
+import com.renju_note.isoo.storage.StorageFragment
+import com.renju_note.isoo.board.SeqTreeBoardManager
 
 class MainActivity : AppCompatActivity() {
 

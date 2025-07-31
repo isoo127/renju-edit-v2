@@ -1,7 +1,6 @@
-package com.renju_note.isoo.util
+package com.renju_note.isoo.board
 
-import com.renju_note.isoo.SeqTree
-import com.renju_note.isoo.data.Stone
+import com.renju_note.isoo.board.Stone
 
 class SeqTreeBoardManager : BoardManager {
 
@@ -15,9 +14,23 @@ class SeqTreeBoardManager : BoardManager {
         for(i in 0..14) {
             for(j in 0..14) {
                 if(seqTree.now_board[i][j] > 0) {
-                    status.add(Stone(i, j, (seqTree.now_board[i][j] - 1).toString(), Stone.Type.BLACK))
+                    status.add(
+                        Stone(
+                            i,
+                            j,
+                            (seqTree.now_board[i][j] - 1).toString(),
+                            Stone.Type.BLACK
+                        )
+                    )
                 } else if(seqTree.now_board[i][j] < 0) {
-                    status.add(Stone(i, j, (seqTree.now_board[i][j] * (-1) - 1).toString(), Stone.Type.WHITE))
+                    status.add(
+                        Stone(
+                            i,
+                            j,
+                            (seqTree.now_board[i][j] * (-1) - 1).toString(),
+                            Stone.Type.WHITE
+                        )
+                    )
                 }
             }
         }

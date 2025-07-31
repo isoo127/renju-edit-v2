@@ -1,4 +1,4 @@
-package com.renju_note.isoo.data
+package com.renju_note.isoo.setting
 
 import com.renju_note.isoo.util.PreferenceUtil
 
@@ -34,4 +34,3 @@ data class TextAreaSetting (
     }
 
 }
-

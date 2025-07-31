@@ -1,6 +1,6 @@
-package com.renju_note.isoo.util
+package com.renju_note.isoo.board
 
-import com.renju_note.isoo.data.Stone
+import com.renju_note.isoo.board.Stone
 
 interface BoardManager {
 

@@ -1,4 +1,4 @@
-package com.renju_note.isoo.util
+package com.renju_note.isoo.storage
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.PopupWindow
 import androidx.recyclerview.widget.RecyclerView
 import com.renju_note.isoo.RenjuEditApplication
-import com.renju_note.isoo.data.StorageElement
 import com.renju_note.isoo.databinding.ItemStorageListBinding
 import com.renju_note.isoo.databinding.PopupMenuStorageBinding
 import io.realm.kotlin.ext.query
@@ -90,7 +89,7 @@ class StorageRVAdapter(private val context : Context) : RecyclerView.Adapter<Sto
     }
 
     fun updateDataList() {
-        val realm = RenjuEditApplication.realm
+        val realm = RenjuEditApplication.Companion.realm
         val results = realm.query<StorageElement>()
             .sort("date", Sort.DESCENDING)
             .find()

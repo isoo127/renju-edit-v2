@@ -1,4 +1,4 @@
-package com.renju_note.isoo;
+package com.renju_note.isoo.board;
 
 import java.io.Serial;
 import java.io.Serializable;

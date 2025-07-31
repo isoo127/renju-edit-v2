@@ -1,4 +1,4 @@
-package com.renju_note.isoo.util
+package com.renju_note.isoo.board
 
 import android.content.Context
 import android.graphics.Canvas
@@ -6,15 +6,15 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
-import com.renju_note.isoo.data.BoardColorSetting
-import io.realm.kotlin.types.RealmList
 import androidx.core.graphics.toColorInt
+import com.renju_note.isoo.setting.BoardColorSetting
+import io.realm.kotlin.types.RealmList
 
 class BoardPreview(context : Context, attrs : AttributeSet) : View(context, attrs) {
 
     private var lineInterval = 0f
     private val paint = Paint()
-    private val boardColorSetting = BoardColorSetting.getDefaultSetting()
+    private val boardColorSetting = BoardColorSetting.Companion.getDefaultSetting()
     private val stones = ArrayList<MiniStone>()
 
     inner class MiniStone(private val x : Int, private val y : Int, private val stoneColor : Int) {

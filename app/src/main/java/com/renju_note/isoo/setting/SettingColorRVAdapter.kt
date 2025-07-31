@@ -1,8 +1,7 @@
-package com.renju_note.isoo.util
+package com.renju_note.isoo.setting
 
 import android.animation.ObjectAnimator
 import android.content.Context
-import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.MotionEvent

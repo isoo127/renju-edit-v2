@@ -1,4 +1,4 @@
-package com.renju_note.isoo.util
+package com.renju_note.isoo.board
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,8 +6,8 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.renju_note.isoo.data.BoardColorSetting
-import com.renju_note.isoo.data.BoardDisplaySetting
+import com.renju_note.isoo.setting.BoardColorSetting
+import com.renju_note.isoo.setting.BoardDisplaySetting
 import java.io.Serializable
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -387,7 +387,7 @@ class BoardLayout(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
     fun deleteLastDrawingElement() {
         points.clear()
         if(drawingElements.isNotEmpty())
-            drawingElements.removeAt(drawingElements.size - 1)
+            drawingElements.removeAt(drawingElements.lastIndex)
         invalidate()
     }
 

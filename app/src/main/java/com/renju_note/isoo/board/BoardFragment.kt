@@ -1,4 +1,4 @@
-package com.renju_note.isoo.fragment
+package com.renju_note.isoo.board
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -19,7 +19,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import android.provider.MediaStore.VOLUME_EXTERNAL
 import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
@@ -31,26 +30,23 @@ import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.toColorInt
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.renju_note.isoo.R
 import com.renju_note.isoo.RenjuEditApplication
-import com.renju_note.isoo.RenjuEditApplication.Companion.boardManager
-import com.renju_note.isoo.RenjuEditApplication.Companion.editingFile
-import com.renju_note.isoo.RenjuEditApplication.Companion.pref
-import com.renju_note.isoo.RenjuEditApplication.Companion.settings
-import com.renju_note.isoo.SeqTree
-import com.renju_note.isoo.data.Stone
-import com.renju_note.isoo.data.StorageElement
+import com.renju_note.isoo.board.Stone
+import com.renju_note.isoo.storage.StorageElement
 import com.renju_note.isoo.databinding.FragmentBoardBinding
 import com.renju_note.isoo.databinding.PopupMenuDrawingModeBinding
 import com.renju_note.isoo.databinding.PopupMenuStoneModeBinding
 import com.renju_note.isoo.dialog.ConfirmDialog
 import com.renju_note.isoo.dialog.PutTextDialog
-import com.renju_note.isoo.util.BoardLayout
+import com.renju_note.isoo.storage.StorageFragment
 import com.renju_note.isoo.util.LoadingAsync
 import io.realm.kotlin.UpdatePolicy
 import kotlinx.coroutines.launch
@@ -65,8 +61,6 @@ import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
-import androidx.core.net.toUri
-import androidx.core.graphics.createBitmap
 
 class BoardFragment : Fragment() {
 
@@ -103,7 +97,7 @@ class BoardFragment : Fragment() {
         buttonsClicked()
         editingTextArea()
 
-        binding.boardBoard.updateBoardStatus(settings.boardColorSetting, settings.boardDisplaySetting)
+        binding.boardBoard.updateBoardStatus(RenjuEditApplication.Companion.settings.boardColorSetting, RenjuEditApplication.Companion.settings.boardDisplaySetting)
 
         toast = Toast(requireContext())
         toast.duration = Toast.LENGTH_SHORT
@@ -117,35 +111,35 @@ class BoardFragment : Fragment() {
         }
 
         binding.boardUndoAllBtn.setOnClickListener {
-            val before = boardManager.getNowBoardStatus()
-            if(boardManager.undoAll()) {
-                val after = boardManager.getNowBoardStatus()
+            val before = RenjuEditApplication.Companion.boardManager.getNowBoardStatus()
+            if(RenjuEditApplication.Companion.boardManager.undoAll()) {
+                val after = RenjuEditApplication.Companion.boardManager.getNowBoardStatus()
                 updateBoard(before, after)
             }
         }
 
         binding.boardUndoBtn.setOnClickListener {
-            val before = boardManager.getNowBoardStatus()
-            if(boardManager.undo()) {
-                val after = boardManager.getNowBoardStatus()
+            val before = RenjuEditApplication.Companion.boardManager.getNowBoardStatus()
+            if(RenjuEditApplication.Companion.boardManager.undo()) {
+                val after = RenjuEditApplication.Companion.boardManager.getNowBoardStatus()
                 updateBoard(before, after)
             }
         }
 
         binding.boardRedoBtn.setOnClickListener {
-            val before = boardManager.getNowBoardStatus()
-            if(boardManager.redo()) {
-                val after = boardManager.getNowBoardStatus()
+            val before = RenjuEditApplication.Companion.boardManager.getNowBoardStatus()
+            if(RenjuEditApplication.Companion.boardManager.redo()) {
+                val after = RenjuEditApplication.Companion.boardManager.getNowBoardStatus()
                 updateBoard(before, after)
             }
         }
 
         binding.boardRedoAllBtn.setOnClickListener {
-            val before = boardManager.getNowBoardStatus()
+            val before = RenjuEditApplication.Companion.boardManager.getNowBoardStatus()
             while (true) {
-                if (!boardManager.redo()) break
+                if (!RenjuEditApplication.Companion.boardManager.redo()) break
             }
-            val after = boardManager.getNowBoardStatus()
+            val after = RenjuEditApplication.Companion.boardManager.getNowBoardStatus()
             updateBoard(before, after)
         }
 
@@ -155,11 +149,11 @@ class BoardFragment : Fragment() {
             points.clear()
             editMode = when(editMode) {
                 EditMode.PUT_STONE -> {
-                    if(settings.modeSetting.canUseTextMode) {
+                    if(RenjuEditApplication.Companion.settings.modeSetting.canUseTextMode) {
                         binding.boardModeBtn.setImageResource(R.drawable.board_text_mode)
                         toast = Toast.makeText(requireContext(), requireContext().getText(R.string.text_mode), Toast.LENGTH_SHORT)
                         EditMode.ADD_TEXT
-                    } else if(settings.modeSetting.canUseDrawMode) {
+                    } else if(RenjuEditApplication.Companion.settings.modeSetting.canUseDrawMode) {
                         binding.boardModeBtn.setImageResource(R.drawable.board_drawing_mode)
                         toast = Toast.makeText(requireContext(), requireContext().getText(R.string.drawing_mode), Toast.LENGTH_SHORT)
                         EditMode.DRAW
@@ -169,7 +163,7 @@ class BoardFragment : Fragment() {
                     }
                 }
                 EditMode.ADD_TEXT -> {
-                    if(settings.modeSetting.canUseDrawMode) {
+                    if(RenjuEditApplication.Companion.settings.modeSetting.canUseDrawMode) {
                         binding.boardModeBtn.setImageResource(R.drawable.board_drawing_mode)
                         toast = Toast.makeText(requireContext(), requireContext().getText(R.string.drawing_mode), Toast.LENGTH_SHORT)
                         EditMode.DRAW
@@ -210,17 +204,17 @@ class BoardFragment : Fragment() {
             popupBinding.popupStoneModeIndexHereBtn.setOnClickListener {
                 toast.cancel()
                 if(!isStartIndexOn) {
-                    if(boardManager.getNowIndex() == 1) settings.boardDisplaySetting.startPoint = 0
-                    else settings.boardDisplaySetting.startPoint = boardManager.getNowIndex() - 2
-                    binding.boardBoard.updateBoardStatus(settings.boardColorSetting, settings.boardDisplaySetting)
-                    settings.save(pref)
+                    if(RenjuEditApplication.Companion.boardManager.getNowIndex() == 1) RenjuEditApplication.Companion.settings.boardDisplaySetting.startPoint = 0
+                    else RenjuEditApplication.Companion.settings.boardDisplaySetting.startPoint = RenjuEditApplication.Companion.boardManager.getNowIndex() - 2
+                    binding.boardBoard.updateBoardStatus(RenjuEditApplication.Companion.settings.boardColorSetting, RenjuEditApplication.Companion.settings.boardDisplaySetting)
+                    RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                     isStartIndexOn = true
                     popupBinding.popupStoneModeIndexHereBtn.setImageResource(R.drawable.board_index_here_on)
                     toast = Toast.makeText(requireContext(), requireContext().getText(R.string.index_here_on), Toast.LENGTH_SHORT)
                 } else {
-                    settings.boardDisplaySetting.startPoint = 0
-                    binding.boardBoard.updateBoardStatus(settings.boardColorSetting, settings.boardDisplaySetting)
-                    settings.save(pref)
+                    RenjuEditApplication.Companion.settings.boardDisplaySetting.startPoint = 0
+                    binding.boardBoard.updateBoardStatus(RenjuEditApplication.Companion.settings.boardColorSetting, RenjuEditApplication.Companion.settings.boardDisplaySetting)
+                    RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                     isStartIndexOn = false
                     popupBinding.popupStoneModeIndexHereBtn.setImageResource(R.drawable.board_index_here_off)
                     toast = Toast.makeText(requireContext(), requireContext().getText(R.string.index_here_off), Toast.LENGTH_SHORT)
@@ -239,7 +233,10 @@ class BoardFragment : Fragment() {
             )
 
             popupBinding.popupDrawingModeDeleteBtn.setOnClickListener {
-                val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.delete_drawing_element_confirm))
+                val confirmDialog = ConfirmDialog(
+                    requireContext(),
+                    resources.getString(R.string.delete_drawing_element_confirm)
+                )
                 confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                 confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                     override fun confirm() {
@@ -294,15 +291,16 @@ class BoardFragment : Fragment() {
     }
 
     private fun delete() {
-        if(boardManager.getNowIndex() != 1) {
-            val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.delete_confirm))
+        if(RenjuEditApplication.Companion.boardManager.getNowIndex() != 1) {
+            val confirmDialog =
+                ConfirmDialog(requireContext(), resources.getString(R.string.delete_confirm))
             confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
             confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                 override fun confirm() {
                     confirmDialog.dismiss()
-                    val before = boardManager.getNowBoardStatus()
-                    boardManager.deleteBranch()
-                    val after = boardManager.getNowBoardStatus()
+                    val before = RenjuEditApplication.Companion.boardManager.getNowBoardStatus()
+                    RenjuEditApplication.Companion.boardManager.deleteBranch()
+                    val after = RenjuEditApplication.Companion.boardManager.getNowBoardStatus()
                     updateBoard(before, after)
                 }
 
@@ -318,7 +316,7 @@ class BoardFragment : Fragment() {
         binding.boardBoard.setOnBoardTouchListener(object : BoardLayout.OnBoardTouchListener() {
             override fun getCoordinates(x: Int, y: Int) {
                 if(editMode != EditMode.DRAW) {
-                    val before = boardManager.getNowBoardStatus()
+                    val before = RenjuEditApplication.Companion.boardManager.getNowBoardStatus()
                     if (editMode == EditMode.ADD_TEXT) {
                         val putTextDialog = PutTextDialog(requireContext())
                         putTextDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
@@ -330,16 +328,16 @@ class BoardFragment : Fragment() {
 
                             override fun ok(text: String) {
                                 putTextDialog.dismiss()
-                                if (boardManager.addNewChild(x, y, text)) {
-                                    val after = boardManager.getNowBoardStatus()
+                                if (RenjuEditApplication.Companion.boardManager.addNewChild(x, y, text)) {
+                                    val after = RenjuEditApplication.Companion.boardManager.getNowBoardStatus()
                                     updateBoard(before, after)
                                 }
                             }
                         })
                         putTextDialog.show()
                     } else {
-                        if (boardManager.putStone(x, y)) {
-                            val after = boardManager.getNowBoardStatus()
+                        if (RenjuEditApplication.Companion.boardManager.putStone(x, y)) {
+                            val after = RenjuEditApplication.Companion.boardManager.getNowBoardStatus()
                             updateBoard(before, after)
                         }
                     }
@@ -348,7 +346,7 @@ class BoardFragment : Fragment() {
                         DrawingMode.LINE -> {
                             if(points.isEmpty()) {
                                 points.add(Pair(x, y))
-                                binding.boardBoard.addPoint(binding.boardBoard.Point(x, y, settings.boardColorSetting.drawLineColor))
+                                binding.boardBoard.addPoint(binding.boardBoard.Point(x, y, RenjuEditApplication.Companion.settings.boardColorSetting.drawLineColor))
                             } else {
                                 binding.boardBoard.deleteAllPoints()
                                 binding.boardBoard.addLine(binding.boardBoard.Line(
@@ -359,7 +357,7 @@ class BoardFragment : Fragment() {
                         DrawingMode.AREA -> {
                             if(points.isEmpty()) {
                                 points.add(Pair(x, y))
-                                binding.boardBoard.addPoint(binding.boardBoard.Point(x, y, settings.boardColorSetting.drawAreaColor))
+                                binding.boardBoard.addPoint(binding.boardBoard.Point(x, y, RenjuEditApplication.Companion.settings.boardColorSetting.drawAreaColor))
                             } else {
                                 binding.boardBoard.deleteAllPoints()
                                 binding.boardBoard.addArea(binding.boardBoard.Area(
@@ -370,7 +368,7 @@ class BoardFragment : Fragment() {
                         DrawingMode.ARROW -> {
                             if(points.isEmpty()) {
                                 points.add(Pair(x, y))
-                                binding.boardBoard.addPoint(binding.boardBoard.Point(x, y, settings.boardColorSetting.drawArrowColor))
+                                binding.boardBoard.addPoint(binding.boardBoard.Point(x, y, RenjuEditApplication.Companion.settings.boardColorSetting.drawArrowColor))
                             } else {
                                 binding.boardBoard.deleteAllPoints()
                                 binding.boardBoard.addArrow(binding.boardBoard.Arrow(
@@ -400,19 +398,19 @@ class BoardFragment : Fragment() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable) {
                 // save boxText to seqTree
-                boardManager.setNowTextBoxString(s.toString())
+                RenjuEditApplication.Companion.boardManager.setNowTextBoxString(s.toString())
             }
         })
         updateTextAreaStatus()
     }
 
     fun updateTextAreaStatus() {
-        binding.boardTextAreaEt.isVisible = settings.textAreaSetting.isVisible
-        binding.boardTextAreaEt.background = makeTextAreaDrawable(settings.textAreaSetting.backgroundColor, settings.textAreaSetting.strokeColor)
+        binding.boardTextAreaEt.isVisible = RenjuEditApplication.Companion.settings.textAreaSetting.isVisible
+        binding.boardTextAreaEt.background = makeTextAreaDrawable(RenjuEditApplication.Companion.settings.textAreaSetting.backgroundColor, RenjuEditApplication.Companion.settings.textAreaSetting.strokeColor)
         binding.boardTextAreaEt.setTextColor(
             blendColors(
                 "#FFFFFF",
-                settings.textAreaSetting.textColor
+                RenjuEditApplication.Companion.settings.textAreaSetting.textColor
             ).toColorInt())
     }
 
@@ -422,7 +420,7 @@ class BoardFragment : Fragment() {
     }
 
     fun updateBoard() {
-        binding.boardBoard.updateBoardStatus(settings.boardColorSetting, settings.boardDisplaySetting)
+        binding.boardBoard.updateBoardStatus(RenjuEditApplication.Companion.settings.boardColorSetting, RenjuEditApplication.Companion.settings.boardDisplaySetting)
     }
 
     private fun makeTextAreaDrawable(backgroundColor : String, strokeColor : String) : GradientDrawable {
@@ -446,8 +444,8 @@ class BoardFragment : Fragment() {
     }
 
     private fun updateBoard(before : ArrayList<Stone>, after : ArrayList<Stone>) {
-        binding.boardTextAreaEt.setText(boardManager.getNowTextBoxString())
-        binding.boardSequenceTv.text = (boardManager.getNowIndex() - 1).toString()
+        binding.boardTextAreaEt.setText(RenjuEditApplication.Companion.boardManager.getNowTextBoxString())
+        binding.boardSequenceTv.text = (RenjuEditApplication.Companion.boardManager.getNowIndex() - 1).toString()
 
         val addStone = ArrayList<BoardLayout.StoneView>()
         val deleteStone = ArrayList<String>()
@@ -461,8 +459,8 @@ class BoardFragment : Fragment() {
             }
         }
 
-        val beforeSequence = boardManager.getSequence(before)
-        val afterSequence = boardManager.getSequence(after)
+        val beforeSequence = RenjuEditApplication.Companion.boardManager.getSequence(before)
+        val afterSequence = RenjuEditApplication.Companion.boardManager.getSequence(after)
         var isAdd = true // after board has more stones than before
         val changeSequence = if(beforeSequence.size > afterSequence.size) {
             isAdd = false
@@ -504,7 +502,10 @@ class BoardFragment : Fragment() {
             if (item != null) {
                 when (item.itemId) {
                     R.id.action_capture -> {
-                        val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.capture_confirm))
+                        val confirmDialog = ConfirmDialog(
+                            requireContext(),
+                            resources.getString(R.string.capture_confirm)
+                        )
                         confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                             override fun confirm() {
@@ -519,18 +520,21 @@ class BoardFragment : Fragment() {
                         saveNowEditingFile()
                     }
                     R.id.new_board -> {
-                        val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.new_file_confirm))
+                        val confirmDialog = ConfirmDialog(
+                            requireContext(),
+                            resources.getString(R.string.new_file_confirm)
+                        )
                         confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                             override fun confirm() {
                                 confirmDialog.dismiss()
-                                boardManager.loadNodes(SeqTree())
+                                RenjuEditApplication.Companion.boardManager.loadNodes(SeqTree())
                                 binding.boardBoard.removeAllStones()
                                 binding.boardBoard.deleteAllDrawingElements()
                                 points.clear()
                                 binding.boardSequenceTv.text = "0"
                                 binding.boardTextAreaEt.text = null
-                                editingFile = null
+                                RenjuEditApplication.Companion.editingFile = null
                                 binding.boardEditingFileNameTv.text = requireContext().getString(R.string.new_file)
                             }
                             override fun refuse() { confirmDialog.dismiss() }
@@ -600,7 +604,10 @@ class BoardFragment : Fragment() {
             put(MediaStore.Images.Media.HEIGHT, height)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { // over Android 10
-            val imageUri = requireActivity().contentResolver.insert(MediaStore.Images.Media.getContentUri(VOLUME_EXTERNAL), contentValues)
+            val imageUri = requireActivity().contentResolver.insert(
+                MediaStore.Images.Media.getContentUri(
+                    MediaStore.VOLUME_EXTERNAL
+                ), contentValues)
             imageUri?.let { uri ->
                 requireActivity().contentResolver.openOutputStream(uri)?.use { outputStream ->
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
@@ -646,16 +653,16 @@ class BoardFragment : Fragment() {
             return fileName
         }
 
-        val newStorageElement = StorageElement.create(
+        val newStorageElement = StorageElement.Companion.create(
             title = getFileNameFromUri(requireContext(), uri),
             uri = uri,
-            seq = boardManager.getSequence(boardManager.getNowBoardStatus())
+            seq = RenjuEditApplication.Companion.boardManager.getSequence(RenjuEditApplication.Companion.boardManager.getNowBoardStatus())
         )
-        editingFile = newStorageElement
-        binding.boardEditingFileNameTv.text = editingFile?.title
+        RenjuEditApplication.Companion.editingFile = newStorageElement
+        binding.boardEditingFileNameTv.text = RenjuEditApplication.Companion.editingFile?.title
 
         lifecycleScope.launch {
-            RenjuEditApplication.realm.write {
+            RenjuEditApplication.Companion.realm.write {
                 copyToRealm(newStorageElement, UpdatePolicy.ALL)
             }
 
@@ -665,8 +672,8 @@ class BoardFragment : Fragment() {
     }
 
     private fun saveNowEditingFile() {
-        if(editingFile != null) {
-            save(editingFile!!.getParsedUri())
+        if(RenjuEditApplication.Companion.editingFile != null) {
+            save(RenjuEditApplication.Companion.editingFile!!.getParsedUri())
         } else {
             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
             intent.addCategory(Intent.CATEGORY_OPENABLE)
@@ -682,7 +689,7 @@ class BoardFragment : Fragment() {
             override fun process() {
                 val outputStream: OutputStream = requireActivity().contentResolver.openOutputStream(uri!!)!!
                 val os = ObjectOutputStream(outputStream)
-                os.writeObject(boardManager.getSeqTree())
+                os.writeObject(RenjuEditApplication.Companion.boardManager.getSeqTree())
                 os.close()
                 outputStream.close()
             }
@@ -724,14 +731,14 @@ class BoardFragment : Fragment() {
                 val inputStream: InputStream = requireActivity().contentResolver.openInputStream(uri!!)!!
                 val ois = ObjectInputStream(inputStream)
                 val tree : Any = ois.readObject() as SeqTree
-                boardManager.loadNodes(tree)
+                RenjuEditApplication.Companion.boardManager.loadNodes(tree)
                 ois.close()
                 inputStream.close()
             }
 
             override fun whenFinished() {
                 Toast.makeText(context, "Load", Toast.LENGTH_SHORT).show()
-                val after = boardManager.getNowBoardStatus()
+                val after = RenjuEditApplication.Companion.boardManager.getNowBoardStatus()
                 updateBoard(before, after)
                 setNowEditingFile(uri!!)
             }

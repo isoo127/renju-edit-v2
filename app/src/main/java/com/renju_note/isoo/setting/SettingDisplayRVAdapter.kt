@@ -1,4 +1,4 @@
-package com.renju_note.isoo.util
+package com.renju_note.isoo.setting
 
 import android.animation.ObjectAnimator
 import android.content.Context

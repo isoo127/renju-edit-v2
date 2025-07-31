@@ -1,4 +1,4 @@
-package com.renju_note.isoo.fragment
+package com.renju_note.isoo.storage
 
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -13,10 +13,11 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.renju_note.isoo.R
 import com.renju_note.isoo.RenjuEditApplication
-import com.renju_note.isoo.data.StorageElement
+import com.renju_note.isoo.board.BoardFragment
+import com.renju_note.isoo.storage.StorageElement
 import com.renju_note.isoo.databinding.FragmentStorageBinding
 import com.renju_note.isoo.dialog.ConfirmDialog
-import com.renju_note.isoo.util.StorageRVAdapter
+import com.renju_note.isoo.storage.StorageRVAdapter
 import kotlinx.coroutines.launch
 
 class StorageFragment : Fragment() {
@@ -40,7 +41,10 @@ class StorageFragment : Fragment() {
         (binding.storageListRv.adapter as StorageRVAdapter).setOnStoragePopupMenuListener(
             object : StorageRVAdapter.StoragePopupMenuListener {
                 override fun load(pos: Int, storageList: List<StorageElement>) {
-                    val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.storage_load_confirm))
+                    val confirmDialog = ConfirmDialog(
+                        requireContext(),
+                        resources.getString(R.string.storage_load_confirm)
+                    )
                     confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                     confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                         override fun confirm() {
@@ -53,13 +57,16 @@ class StorageFragment : Fragment() {
                 }
 
                 override fun delete(pos: Int, element: StorageElement) {
-                    val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.storage_delete_confirm))
+                    val confirmDialog = ConfirmDialog(
+                        requireContext(),
+                        resources.getString(R.string.storage_delete_confirm)
+                    )
                     confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                     confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                         override fun confirm() {
                             confirmDialog.dismiss()
                             lifecycleScope.launch {
-                                val realm = RenjuEditApplication.realm
+                                val realm = RenjuEditApplication.Companion.realm
                                 realm.write {
                                     val liveObjectToDelete = findLatest(element)
                                     liveObjectToDelete?.let {

@@ -1,25 +1,22 @@
-package com.renju_note.isoo.fragment
+package com.renju_note.isoo.setting
 
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.renju_note.isoo.R
-import com.renju_note.isoo.RenjuEditApplication.Companion.pref
-import com.renju_note.isoo.RenjuEditApplication.Companion.settings
+import com.renju_note.isoo.RenjuEditApplication
+import com.renju_note.isoo.board.BoardFragment
 import com.renju_note.isoo.databinding.FragmentSettingBinding
 import com.renju_note.isoo.dialog.ColorPickerDialog
 import com.renju_note.isoo.dialog.ConfirmDialog
-import com.renju_note.isoo.util.SettingColorRVAdapter
-import com.renju_note.isoo.util.SettingDisplayRVAdapter
-import androidx.core.graphics.drawable.toDrawable
-import androidx.core.graphics.toColorInt
 
 class SettingFragment : Fragment() {
 
@@ -36,13 +33,16 @@ class SettingFragment : Fragment() {
         colorSettingInit()
 
         binding.settingRollbackBtn.setOnClickListener {
-            val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.default_setting_warning))
+            val confirmDialog = ConfirmDialog(
+                requireContext(),
+                resources.getString(R.string.default_setting_warning)
+            )
             confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
             confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
                 override fun confirm() {
                     confirmDialog.dismiss()
-                    settings.setDefaultSetting()
-                    settings.save(pref)
+                    RenjuEditApplication.Companion.settings.setDefaultSetting()
+                    RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                     update()
                     displaySettingInit()
                     colorSettingInit()
@@ -77,155 +77,199 @@ class SettingFragment : Fragment() {
             override fun onItemClick(position: Int) {
                 when(position) {
                     0 -> {
-                        val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.boardColor)
+                        val colorPickerDialog = ColorPickerDialog(
+                            requireContext(),
+                            requireActivity(),
+                            RenjuEditApplication.Companion.settings.boardColorSetting.boardColor
+                        )
                         colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
-                                settings.boardColorSetting.boardColor = color
+                                RenjuEditApplication.Companion.settings.boardColorSetting.boardColor = color
                                 binding.settingColorRv.getChildAt(position).findViewById<View>(R.id.item_color_preview).background =
                                     makePreviewDrawable(color)
-                                settings.save(pref)
+                                RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                                 update()
                             }
                         })
                     }
                     1 -> {
-                        val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.lineColor)
+                        val colorPickerDialog = ColorPickerDialog(
+                            requireContext(),
+                            requireActivity(),
+                            RenjuEditApplication.Companion.settings.boardColorSetting.lineColor
+                        )
                         colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
-                                settings.boardColorSetting.lineColor = color
+                                RenjuEditApplication.Companion.settings.boardColorSetting.lineColor = color
                                 binding.settingColorRv.getChildAt(position).findViewById<View>(R.id.item_color_preview).background =
                                     makePreviewDrawable(color)
-                                settings.save(pref)
+                                RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                                 update()
                             }
                         })
                     }
                     2 -> {
-                        val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.textColor)
+                        val colorPickerDialog = ColorPickerDialog(
+                            requireContext(),
+                            requireActivity(),
+                            RenjuEditApplication.Companion.settings.boardColorSetting.textColor
+                        )
                         colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
-                                settings.boardColorSetting.textColor = color
+                                RenjuEditApplication.Companion.settings.boardColorSetting.textColor = color
                                 binding.settingColorRv.getChildAt(position).findViewById<View>(R.id.item_color_preview).background =
                                     makePreviewDrawable(color)
-                                settings.save(pref)
+                                RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                                 update()
                             }
                         })
                     }
                     3 -> {
-                        val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.nodeColor)
+                        val colorPickerDialog = ColorPickerDialog(
+                            requireContext(),
+                            requireActivity(),
+                            RenjuEditApplication.Companion.settings.boardColorSetting.nodeColor
+                        )
                         colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
-                                settings.boardColorSetting.nodeColor = color
+                                RenjuEditApplication.Companion.settings.boardColorSetting.nodeColor = color
                                 binding.settingColorRv.getChildAt(position).findViewById<View>(R.id.item_color_preview).background =
                                     makePreviewDrawable(color)
-                                settings.save(pref)
+                                RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                                 update()
                             }
                         })
                     }
                     4 -> {
-                        val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.lastStoneStrokeColor)
+                        val colorPickerDialog = ColorPickerDialog(
+                            requireContext(),
+                            requireActivity(),
+                            RenjuEditApplication.Companion.settings.boardColorSetting.lastStoneStrokeColor
+                        )
                         colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
-                                settings.boardColorSetting.lastStoneStrokeColor = color
+                                RenjuEditApplication.Companion.settings.boardColorSetting.lastStoneStrokeColor = color
                                 binding.settingColorRv.getChildAt(position).findViewById<View>(R.id.item_color_preview).background =
                                     makePreviewDrawable(color)
-                                settings.save(pref)
+                                RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                                 update()
                             }
                         })
                     }
                     5 -> {
-                        val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.textAreaSetting.backgroundColor)
+                        val colorPickerDialog = ColorPickerDialog(
+                            requireContext(),
+                            requireActivity(),
+                            RenjuEditApplication.Companion.settings.textAreaSetting.backgroundColor
+                        )
                         colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
-                                settings.textAreaSetting.backgroundColor = color
+                                RenjuEditApplication.Companion.settings.textAreaSetting.backgroundColor = color
                                 binding.settingColorRv.getChildAt(position).findViewById<View>(R.id.item_color_preview).background =
                                     makePreviewDrawable(color)
-                                settings.save(pref)
+                                RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                                 update()
                             }
                         })
                     }
                     6 -> {
-                        val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.textAreaSetting.strokeColor)
+                        val colorPickerDialog = ColorPickerDialog(
+                            requireContext(),
+                            requireActivity(),
+                            RenjuEditApplication.Companion.settings.textAreaSetting.strokeColor
+                        )
                         colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
-                                settings.textAreaSetting.strokeColor = color
+                                RenjuEditApplication.Companion.settings.textAreaSetting.strokeColor = color
                                 binding.settingColorRv.getChildAt(position).findViewById<View>(R.id.item_color_preview).background =
                                     makePreviewDrawable(color)
-                                settings.save(pref)
+                                RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                                 update()
                             }
                         })
                     }
                     7 -> {
-                        val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.textAreaSetting.textColor)
+                        val colorPickerDialog = ColorPickerDialog(
+                            requireContext(),
+                            requireActivity(),
+                            RenjuEditApplication.Companion.settings.textAreaSetting.textColor
+                        )
                         colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
-                                settings.textAreaSetting.textColor = color
+                                RenjuEditApplication.Companion.settings.textAreaSetting.textColor = color
                                 binding.settingColorRv.getChildAt(position).findViewById<View>(R.id.item_color_preview).background =
                                     makePreviewDrawable(color)
-                                settings.save(pref)
+                                RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                                 update()
                             }
                         })
                     }
                     8 -> {
-                        val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.drawLineColor)
+                        val colorPickerDialog = ColorPickerDialog(
+                            requireContext(),
+                            requireActivity(),
+                            RenjuEditApplication.Companion.settings.boardColorSetting.drawLineColor
+                        )
                         colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
-                                settings.boardColorSetting.drawLineColor = color
+                                RenjuEditApplication.Companion.settings.boardColorSetting.drawLineColor = color
                                 binding.settingColorRv.getChildAt(position).findViewById<View>(R.id.item_color_preview).background =
                                     makePreviewDrawable(color)
-                                settings.save(pref)
+                                RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                                 update()
                             }
                         })
                     }
                     9 -> {
-                        val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.drawAreaColor)
+                        val colorPickerDialog = ColorPickerDialog(
+                            requireContext(),
+                            requireActivity(),
+                            RenjuEditApplication.Companion.settings.boardColorSetting.drawAreaColor
+                        )
                         colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
-                                settings.boardColorSetting.drawAreaColor = color
+                                RenjuEditApplication.Companion.settings.boardColorSetting.drawAreaColor = color
                                 binding.settingColorRv.getChildAt(position).findViewById<View>(R.id.item_color_preview).background =
                                     makePreviewDrawable(color)
-                                settings.save(pref)
+                                RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                                 update()
                             }
                         })
                     }
                     10 -> {
-                        val colorPickerDialog = ColorPickerDialog(requireContext(), requireActivity(), settings.boardColorSetting.drawArrowColor)
+                        val colorPickerDialog = ColorPickerDialog(
+                            requireContext(),
+                            requireActivity(),
+                            RenjuEditApplication.Companion.settings.boardColorSetting.drawArrowColor
+                        )
                         colorPickerDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
                         colorPickerDialog.show()
                         colorPickerDialog.setOnApplyColorListener(object : ColorPickerDialog.OnApplyColorListener {
                             override fun onApplyColor(color: String) {
-                                settings.boardColorSetting.drawArrowColor = color
+                                RenjuEditApplication.Companion.settings.boardColorSetting.drawArrowColor = color
                                 binding.settingColorRv.getChildAt(position).findViewById<View>(R.id.item_color_preview).background =
                                     makePreviewDrawable(color)
-                                settings.save(pref)
+                                RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                                 update()
                             }
                         })
@@ -245,25 +289,25 @@ class SettingFragment : Fragment() {
                 var isUpdateMode = false
                 when(position) {
                     0 -> {
-                        settings.textAreaSetting.isVisible = isCheck
-                        settings.save(pref)
+                        RenjuEditApplication.Companion.settings.textAreaSetting.isVisible = isCheck
+                        RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                     }
                     1 -> {
-                        settings.boardDisplaySetting.sequenceVisible = isCheck
-                        settings.save(pref)
+                        RenjuEditApplication.Companion.settings.boardDisplaySetting.sequenceVisible = isCheck
+                        RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                     }
                     2 -> {
-                        settings.boardDisplaySetting.nextNodeVisible = isCheck
-                        settings.save(pref)
+                        RenjuEditApplication.Companion.settings.boardDisplaySetting.nextNodeVisible = isCheck
+                        RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                     }
                     3 -> {
-                        settings.modeSetting.canUseTextMode = isCheck
-                        settings.save(pref)
+                        RenjuEditApplication.Companion.settings.modeSetting.canUseTextMode = isCheck
+                        RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                         isUpdateMode = true
                     }
                     4 -> {
-                        settings.modeSetting.canUseDrawMode = isCheck
-                        settings.save(pref)
+                        RenjuEditApplication.Companion.settings.modeSetting.canUseDrawMode = isCheck
+                        RenjuEditApplication.Companion.settings.save(RenjuEditApplication.Companion.pref)
                         isUpdateMode = true
                     }
                 }

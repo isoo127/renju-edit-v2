@@ -1,4 +1,4 @@
-package com.renju_note.isoo.data
+package com.renju_note.isoo.board
 
 data class Stone(
     val x : Int,

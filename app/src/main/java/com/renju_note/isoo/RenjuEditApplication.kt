@@ -1,9 +1,13 @@
 package com.renju_note.isoo
 
 import android.app.Application
-import com.renju_note.isoo.data.*
+import com.renju_note.isoo.board.SeqTreeBoardManager
+import com.renju_note.isoo.setting.BoardColorSetting
+import com.renju_note.isoo.setting.BoardDisplaySetting
+import com.renju_note.isoo.setting.ModeSetting
+import com.renju_note.isoo.setting.TextAreaSetting
+import com.renju_note.isoo.storage.StorageElement
 import com.renju_note.isoo.util.PreferenceUtil
-import com.renju_note.isoo.util.SeqTreeBoardManager
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 

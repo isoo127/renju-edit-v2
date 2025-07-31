@@ -1,13 +1,14 @@
-package com.renju_note.isoo.data
+package com.renju_note.isoo.storage
 
 import android.net.Uri
+import androidx.core.net.toUri
+import com.renju_note.isoo.board.Stone
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import androidx.core.net.toUri
 
 class StorageElement : RealmObject {
 
