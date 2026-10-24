@@ -2,38 +2,31 @@ package com.renju_note.isoo.storage
 
 import android.net.Uri
 import androidx.core.net.toUri
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.renju_note.isoo.board.Stone
-import io.realm.kotlin.ext.realmListOf
-import io.realm.kotlin.types.RealmList
-import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.annotations.PrimaryKey
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class StorageElement : RealmObject {
-
+@Entity(tableName = "storage_element")
+data class StorageElement(
     @PrimaryKey
-    var location : String = ""
-    var title : String = ""
-    var date : String = ""
-    var sequence: RealmList<String> = realmListOf()
+    val location : String,
+    val title : String,
+    val date : String,
+    val sequence : List<String>
+) {
 
     companion object {
-        fun create(title: String, uri: Uri, seq: ArrayList<Stone>): StorageElement {
-            val element = StorageElement()
-            element.title = title
+        private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
-            val current = LocalDateTime.now()
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-            element.date = current.format(formatter)
-
-            for (stone in seq) {
-                val str = stone.x.toString() + "/" + stone.y.toString()
-                element.sequence.add(str)
-            }
-
-            element.location = uri.toString()
-            return element
+        fun create(title: String, uri: Uri, seq: List<Stone>, date: LocalDateTime = LocalDateTime.now()): StorageElement {
+            return StorageElement(
+                location = uri.toString(),
+                title = title,
+                date = date.format(dateFormatter),
+                sequence = seq.map { stone -> stone.x.toString() + "/" + stone.y.toString() }
+            )
         }
     }
 

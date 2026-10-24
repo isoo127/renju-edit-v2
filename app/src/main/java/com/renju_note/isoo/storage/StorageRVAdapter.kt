@@ -2,76 +2,61 @@ package com.renju_note.isoo.storage
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.renju_note.isoo.RenjuEditApplication
 import com.renju_note.isoo.databinding.ItemStorageListBinding
 import com.renju_note.isoo.databinding.PopupMenuStorageBinding
-import io.realm.kotlin.ext.query
-import io.realm.kotlin.query.Sort
 
-class StorageRVAdapter(private val context : Context) : RecyclerView.Adapter<StorageRVAdapter.ViewHolder>() {
+class StorageRVAdapter(
+    private val context : Context,
+    private val listener : StoragePopupMenuListener
+) : ListAdapter<StorageElement, StorageRVAdapter.ViewHolder>(StorageDiffCallback()) {
 
-    private lateinit var storageList : List<StorageElement>
+    class StorageDiffCallback : DiffUtil.ItemCallback<StorageElement>() {
+        override fun areItemsTheSame(oldItem: StorageElement, newItem: StorageElement): Boolean {
+            return oldItem.location == newItem.location
+        }
+
+        override fun areContentsTheSame(oldItem: StorageElement, newItem: StorageElement): Boolean {
+            return oldItem == newItem
+        }
+    }
 
     interface StoragePopupMenuListener {
-        fun load(pos : Int, storageList : List<StorageElement>)
-        fun delete(pos : Int, element : StorageElement)
-    }
-
-    private var popupMenuListener : StoragePopupMenuListener? = null
-
-    fun setOnStoragePopupMenuListener(listener : StoragePopupMenuListener) {
-        popupMenuListener = listener
-    }
-
-    init {
-        updateDataList()
+        fun onLoad(element : StorageElement)
+        fun onDelete(element : StorageElement)
     }
 
     inner class ViewHolder(private val binding : ItemStorageListBinding)
         : RecyclerView.ViewHolder(binding.root) {
-        fun bind(pos : Int) {
-            if(pos >= storageList.size) {
-                binding.itemStoragePreviewBg.visibility = View.INVISIBLE
-                binding.itemStoragePreview.visibility = View.INVISIBLE
-                binding.itemStorageTitleTv.visibility = View.INVISIBLE
-                binding.itemStorageDateTv.visibility = View.INVISIBLE
-                binding.itemStorageMenuBtn.visibility = View.INVISIBLE
-            } else {
-                binding.itemStoragePreviewBg.visibility = View.VISIBLE
-                binding.itemStoragePreview.visibility = View.VISIBLE
-                binding.itemStorageTitleTv.visibility = View.VISIBLE
-                binding.itemStorageDateTv.visibility = View.VISIBLE
-                binding.itemStorageMenuBtn.visibility = View.VISIBLE
+        fun bind(element : StorageElement) {
+            binding.itemStorageTitleTv.text = element.title
+            binding.itemStorageDateTv.text = element.date
+            binding.itemStoragePreview.putStone(element.sequence)
 
-                binding.itemStorageTitleTv.text = storageList[pos].title
-                binding.itemStorageDateTv.text = storageList[pos].date
-                binding.itemStoragePreview.putStone(storageList[pos].sequence)
+            binding.itemStorageMenuBtn.setOnClickListener {
+                val popupBinding = PopupMenuStorageBinding.inflate(LayoutInflater.from(context))
+                val popupWindow = PopupWindow(popupBinding.root, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
 
-                binding.itemStorageMenuBtn.setOnClickListener {
-                    val popupBinding = PopupMenuStorageBinding.inflate(LayoutInflater.from(context))
-                    val popupWindow = PopupWindow(
-                        popupBinding.root,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        true
-                    )
-                    popupBinding.storagePopupLoadBtn.setOnClickListener {
-                        popupWindow.dismiss()
-                        popupMenuListener?.load(pos, storageList)
-                    }
-                    popupBinding.storagePopupDeleteBtn.setOnClickListener {
-                        popupWindow.dismiss()
-                        popupMenuListener?.delete(pos, storageList[pos])
-                    }
-                    popupWindow.elevation = 50f
-                    popupWindow.showAsDropDown(binding.itemStorageMenuBtn)
+                popupBinding.storagePopupLoadBtn.setOnClickListener {
+                    popupWindow.dismiss()
+                    currentElement()?.let { listener.onLoad(it) }
                 }
+                popupBinding.storagePopupDeleteBtn.setOnClickListener {
+                    popupWindow.dismiss()
+                    currentElement()?.let { listener.onDelete(it) }
+                }
+                popupWindow.elevation = 50f
+                popupWindow.showAsDropDown(binding.itemStorageMenuBtn)
             }
         }
+
+        // the list may have changed while the popup was open
+        private fun currentElement() : StorageElement? =
+            bindingAdapterPosition.takeIf { it != RecyclerView.NO_POSITION }?.let { getItem(it) }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -80,20 +65,7 @@ class StorageRVAdapter(private val context : Context) : RecyclerView.Adapter<Sto
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(position)
-    }
-
-    override fun getItemCount(): Int {
-        return if(storageList.size < 15) 15
-        else storageList.size
-    }
-
-    fun updateDataList() {
-        val realm = RenjuEditApplication.Companion.realm
-        val results = realm.query<StorageElement>()
-            .sort("date", Sort.DESCENDING)
-            .find()
-        storageList = results
+        holder.bind(getItem(position))
     }
 
 }

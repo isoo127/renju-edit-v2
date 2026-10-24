@@ -6,10 +6,14 @@ import com.renju_note.isoo.setting.BoardColorSetting
 import com.renju_note.isoo.setting.BoardDisplaySetting
 import com.renju_note.isoo.setting.ModeSetting
 import com.renju_note.isoo.setting.TextAreaSetting
+import com.renju_note.isoo.storage.LegacyStorageMigration
+import com.renju_note.isoo.storage.StorageDatabase
 import com.renju_note.isoo.storage.StorageElement
 import com.renju_note.isoo.util.PreferenceUtil
-import io.realm.kotlin.Realm
-import io.realm.kotlin.RealmConfiguration
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class RenjuEditApplication : Application() {
 
@@ -43,22 +47,23 @@ class RenjuEditApplication : Application() {
 
     companion object {
         lateinit var pref : PreferenceUtil
-        lateinit var realm: Realm
+        lateinit var database : StorageDatabase
         var settings = Settings()
         var boardManager = SeqTreeBoardManager()
         var editingFile : StorageElement? = null
     }
+
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
         pref = PreferenceUtil(applicationContext)
         settings.load(pref)
 
-        val config = RealmConfiguration.Builder(schema = setOf(StorageElement::class))
-            .name("renju_edit.realm")
-            .deleteRealmIfMigrationNeeded()
-            .build()
-        realm = Realm.open(config)
+        database = StorageDatabase.create(applicationContext)
+        applicationScope.launch {
+            LegacyStorageMigration.migrateIfNeeded(applicationContext, database.storageDao())
+        }
     }
 
 }

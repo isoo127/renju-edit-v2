@@ -1,6 +1,6 @@
 package com.renju_note.isoo.board
 
-import com.renju_note.isoo.board.Stone
+import com.renju_note.isoo.SeqTree
 
 class SeqTreeBoardManager : BoardManager {
 

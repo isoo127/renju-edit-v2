@@ -39,16 +39,14 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.renju_note.isoo.R
 import com.renju_note.isoo.RenjuEditApplication
-import com.renju_note.isoo.board.Stone
-import com.renju_note.isoo.storage.StorageElement
+import com.renju_note.isoo.SeqTree
 import com.renju_note.isoo.databinding.FragmentBoardBinding
 import com.renju_note.isoo.databinding.PopupMenuDrawingModeBinding
 import com.renju_note.isoo.databinding.PopupMenuStoneModeBinding
 import com.renju_note.isoo.dialog.ConfirmDialog
 import com.renju_note.isoo.dialog.PutTextDialog
-import com.renju_note.isoo.storage.StorageFragment
+import com.renju_note.isoo.storage.StorageElement
 import com.renju_note.isoo.util.LoadingAsync
-import io.realm.kotlin.UpdatePolicy
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -98,6 +96,10 @@ class BoardFragment : Fragment() {
         editingTextArea()
 
         binding.boardBoard.updateBoardStatus(RenjuEditApplication.Companion.settings.boardColorSetting, RenjuEditApplication.Companion.settings.boardDisplaySetting)
+
+        // the view is recreated with the activity (rotation on large screens, dark mode, ...) while the board stays in memory
+        updateBoard(ArrayList(), RenjuEditApplication.Companion.boardManager.getNowBoardStatus())
+        binding.boardEditingFileNameTv.text = RenjuEditApplication.Companion.editingFile?.title ?: requireContext().getString(R.string.new_file)
 
         toast = Toast(requireContext())
         toast.duration = Toast.LENGTH_SHORT
@@ -576,8 +578,9 @@ class BoardFragment : Fragment() {
         }
 
     private fun captureBoard() {
-        if (ContextCompat.checkSelfPermission(
-                requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        // only needed for the file path below Android 10, the manifest declares it up to API 28
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
+            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED
         ) {
             requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -662,12 +665,7 @@ class BoardFragment : Fragment() {
         binding.boardEditingFileNameTv.text = RenjuEditApplication.Companion.editingFile?.title
 
         lifecycleScope.launch {
-            RenjuEditApplication.Companion.realm.write {
-                copyToRealm(newStorageElement, UpdatePolicy.ALL)
-            }
-
-            val storageFragment = requireActivity().supportFragmentManager.findFragmentByTag("f1") as StorageFragment?
-            storageFragment?.updateRV()
+            RenjuEditApplication.Companion.database.storageDao().upsert(newStorageElement)
         }
     }
 

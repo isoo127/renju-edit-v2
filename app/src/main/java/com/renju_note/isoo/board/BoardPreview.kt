@@ -8,7 +8,6 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.graphics.toColorInt
 import com.renju_note.isoo.setting.BoardColorSetting
-import io.realm.kotlin.types.RealmList
 
 class BoardPreview(context : Context, attrs : AttributeSet) : View(context, attrs) {
 
@@ -46,7 +45,7 @@ class BoardPreview(context : Context, attrs : AttributeSet) : View(context, attr
         }
     }
 
-    fun putStone(sequence : RealmList<String>) {
+    fun putStone(sequence : List<String>) {
         stones.clear()
         for((count, coord) in sequence.withIndex()) {
             val point = coord.split("/")

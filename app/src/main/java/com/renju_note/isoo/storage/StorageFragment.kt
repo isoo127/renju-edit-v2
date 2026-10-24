@@ -1,6 +1,5 @@
 package com.renju_note.isoo.storage
 
-import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,21 +7,23 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.renju_note.isoo.R
-import com.renju_note.isoo.RenjuEditApplication
 import com.renju_note.isoo.board.BoardFragment
-import com.renju_note.isoo.storage.StorageElement
 import com.renju_note.isoo.databinding.FragmentStorageBinding
 import com.renju_note.isoo.dialog.ConfirmDialog
-import com.renju_note.isoo.storage.StorageRVAdapter
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class StorageFragment : Fragment() {
 
     private lateinit var binding : FragmentStorageBinding
+    private lateinit var storageAdapter : StorageRVAdapter
+    private val viewModel : StorageViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,66 +31,65 @@ class StorageFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentStorageBinding.inflate(inflater, container, false)
-
-        binding.storageListRv.layoutManager = LinearLayoutManager(requireContext())
-        binding.storageListRv.adapter = StorageRVAdapter(requireContext())
-        if(binding.storageListRv.itemDecorationCount == 0)
-            binding.storageListRv.addItemDecoration(DividerItemDecoration(requireContext(), 1))
-
-        val boardFragment = requireActivity().supportFragmentManager.findFragmentByTag("f0") as BoardFragment
-
-        (binding.storageListRv.adapter as StorageRVAdapter).setOnStoragePopupMenuListener(
-            object : StorageRVAdapter.StoragePopupMenuListener {
-                override fun load(pos: Int, storageList: List<StorageElement>) {
-                    val confirmDialog = ConfirmDialog(
-                        requireContext(),
-                        resources.getString(R.string.storage_load_confirm)
-                    )
-                    confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
-                    confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
-                        override fun confirm() {
-                            confirmDialog.dismiss()
-                            boardFragment.load(storageList[pos].getParsedUri())
-                        }
-                        override fun refuse() { confirmDialog.dismiss() }
-                    })
-                    confirmDialog.show()
-                }
-
-                override fun delete(pos: Int, element: StorageElement) {
-                    val confirmDialog = ConfirmDialog(
-                        requireContext(),
-                        resources.getString(R.string.storage_delete_confirm)
-                    )
-                    confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
-                    confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
-                        override fun confirm() {
-                            confirmDialog.dismiss()
-                            lifecycleScope.launch {
-                                val realm = RenjuEditApplication.Companion.realm
-                                realm.write {
-                                    val liveObjectToDelete = findLatest(element)
-                                    liveObjectToDelete?.let {
-                                        delete(it)
-                                    }
-                                }
-                                updateRV()
-                            }
-                        }
-                        override fun refuse() { confirmDialog.dismiss() }
-                    })
-                    confirmDialog.show()
-                }
-            }
-        )
-
         return binding.root
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun updateRV() {
-        (binding.storageListRv.adapter as StorageRVAdapter).updateDataList()
-        binding.storageListRv.adapter?.notifyDataSetChanged()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupRecyclerView()
+        observeViewModel()
+    }
+
+    private fun setupRecyclerView() {
+        val listener = object : StorageRVAdapter.StoragePopupMenuListener {
+            override fun onLoad(element: StorageElement) {
+                val boardFragment = requireActivity().supportFragmentManager.findFragmentByTag("f0") as? BoardFragment
+                val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.storage_load_confirm))
+                confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+                confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
+                    override fun confirm() {
+                        confirmDialog.dismiss()
+                        boardFragment?.load(element.getParsedUri())
+                    }
+                    override fun refuse() { confirmDialog.dismiss() }
+                })
+                confirmDialog.show()
+            }
+
+            override fun onDelete(element: StorageElement) {
+                val confirmDialog = ConfirmDialog(requireContext(), resources.getString(R.string.storage_delete_confirm))
+                confirmDialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+                confirmDialog.setOnResponseListener(object : ConfirmDialog.OnResponseListener {
+                    override fun confirm() {
+                        viewModel.deleteElement(element)
+                        confirmDialog.dismiss()
+                    }
+                    override fun refuse() { confirmDialog.dismiss() }
+                })
+                confirmDialog.show()
+            }
+        }
+        storageAdapter = StorageRVAdapter(requireContext(), listener)
+        binding.storageListRv.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = storageAdapter
+            if (itemDecorationCount == 0) {
+                addItemDecoration(DividerItemDecoration(requireContext(), 1))
+            }
+        }
+    }
+
+    private fun observeViewModel() {
+        viewModel.storageList
+            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
+            .onEach { list ->
+                storageAdapter.submitList(list) {
+                    if (list.isNotEmpty()) {
+                        binding.storageListRv.scrollToPosition(0)
+                    }
+                }
+            }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
 }
